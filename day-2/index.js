@@ -38,7 +38,7 @@
    What do you get if you multiply your final horizontal position by your final depth?
 
 
-   Part Two: 
+   Part 2: 
 
    Based on your calculations, the planned course doesn't seem to make any sense. You find the submarine
    manual and discover that the process is actually slightly more complicated.
@@ -143,6 +143,3 @@ function partTwo() {
     });
     console.log(`Final horizontal * depth pos = ${marine.multiply()}`);
 };
-
-partTwo();
-
