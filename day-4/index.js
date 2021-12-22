@@ -71,6 +71,21 @@
   
    What will your final score be if you choose that board?
 
+
+   Part 2:
+   
+   One the other hand, it might be wise to try a different strategy; let the giant squid win.
+
+   You aren't sure how many bingo boards a giant squid could play at once, so rather than waste time counting its arms,
+   the safe thing to do is to figure out which board will win last and choose that one. That way, no matter which boards
+   it picks, it will win for sure.
+
+   In the above example, the second board is the last to win, which happens after 13 is eventually called and its middle column
+   is completely marked. If you were to keep playing until this point, the second board would have a sum of unmarked numbers
+   equal to 148 for a final score of 148 * 13 = 1924.
+
+   Figure out which board will win last. Once it wins what would its final score be?
+   
 */
 
 const fs = require("fs");
@@ -80,7 +95,7 @@ const numbers = data.shift().split(",");
 const dataLength = Math.ceil(data.length / 6);
 
 let boardArray = [];
-let winner_board = [];
+let winnerBoards = [];
 
 function generateBoard() {
     for(let i = 0; i < dataLength; i++) {
@@ -123,30 +138,38 @@ class Board {
     checkForWinner() {	
 	let row_count = 0;
 	let column_count = 0;
-
-	for(let i = 0; i < this.board.length && !this.winner; i++) {
-	    for(let j = 0; j < this.board[i].length && !this.winner; j++) {
-		if(row_count === 5) {
-		    this.winner = true;
-		}
-		if(this.board[i][j].marked) row_count++;
-		else { row_count = 0; break; }
-	    }
-	}
-	
 	let col = [];
 	
 	for(let i = 0; i < this.board.length && !this.winner; i++) {
 	    col = this.board.map(x => x[i]);
-	    for(let k = 0; k < col.length && !this.winner; k++) {
-		if(column_count === 5) {
-		    this.winner = true;
-		}
-		if(col[k].marked) column_count++;
-		else { column_count = 0; break; }
-	    }
-	}
 
+	    for(let j = 0; j < this.board[i].length && !this.winner; j++) {
+		if(this.board[i][j].marked) row_count++;
+		else {
+		    row_count = 0;
+		    break;
+		}
+
+		if(row_count == 5) {
+		    this.winner = true;
+		    break;
+		}
+	    }
+	    
+	    for(let k = 0; k < col.length && !this.winner; k++) {
+		if(col[k].marked) column_count++;
+		else {
+		    column_count = 0;
+		    break;
+		}
+		
+		if(column_count == 5) {
+		    this.winner = true;
+		    break;
+		}
+	    }
+	    
+	}
 	return this.winner;
     }
 };
@@ -171,21 +194,53 @@ function partOne() {
 	    }
 
 	    if(boardArray[j].checkForWinner()) {
-		winner_board = boardArray[j];
+		winnerBoards = boardArray[j];
 		stop = true;
 	    }
 	}
     }
-    console.log("first winner found");
-    winner_board.printBoard();
 
-    for(let i = 0; i < winner_board.board.length; i++) {
-	for(let j = 0; j < winner_board.board[i].length; j++) {
-	    if(!winner_board.board[i][j].marked) sum += parseInt(winner_board.board[i][j].value)
+    for(let i = 0; i < winnerBoards.board.length; i++) {
+	for(let j = 0; j < winnerBoards.board[i].length; j++) {
+	    if(!winnerBoards.board[i][j].marked) sum += parseInt(winnerBoards.board[i][j].value)
 	}
     }
     console.log("Sum of all unmarked numbers: " + sum);
     console.log("Winning draw: " + draw);
     console.log("Sum multiplied by winning draw: " + sum * draw);
 }
-partOne();
+
+function partTwo() {
+    generateBoard();
+    
+    let draw = 0;
+    let sum = 0;
+    
+    for(let i = 0; i < numbers.length && boardArray.length > 0; i++) {
+	draw = parseInt(numbers[i]);
+	console.log("drawing: " + draw);
+	
+	for(let j = 0; j < boardArray.length; j++) {
+	    for(let k = 0; k < boardArray[j].board.length; k++) {
+		let found = boardArray[j].board[k].find(e => parseInt(e.value) == draw);
+		if(found) found.marked = true;
+	    }
+	    
+	    if(boardArray[j].checkForWinner()) {
+		winnerBoards.push(boardArray[j]);
+	    } 
+	}
+
+	boardArray = boardArray.filter(e => !e.winner);
+    }
+    
+    for(let i = 0; i < winnerBoards.at(-1).board.length; i++) {
+	for(let j = 0; j < winnerBoards.at(-1).board[i].length; j++) {
+	    if(!winnerBoards.at(-1).board[i][j].marked) sum += parseInt(winnerBoards.at(-1).board[i][j].value)
+	}
+    }
+    
+    console.log("Sum of all unmarked numbers: " + sum);
+    console.log("Winning draw: " + draw);
+    console.log("Sum multiplied by winning draw: " + sum * draw);
+}
