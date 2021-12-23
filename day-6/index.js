@@ -65,6 +65,15 @@
 
    Find a way to simulate lanternfish. How many lanternfish would there be after 80 days?
 
+
+   Part 2:
+
+   Suppose the lanternfish live forever and have unlimited food and space. Would they take over the entire ocean?
+
+   After 256 days in the example above, there would be a total of 26984457539 lanternfish!
+
+   How many lanternfish would there be after 256 days?
+
 */
 
 const fs = require("fs");
@@ -73,10 +82,16 @@ const data = fs.readFileSync("input.txt", { encoding: "utf-8" })
       .split("\n")
       .map(e => e.split(",")).reduce((prev, next) => prev.concat(next)).map(Number);
 
-let push_amount = 0;
-let used_turn = false;
+// https://gist.github.com/damirm/18848ae9636abb524eb4
+function shift(arr, direction, n) {
+    let times = n > arr.length ? n % arr.length : n;
+    return arr.concat(arr.splice(0, (direction > 0 ? arr.length - times : times)));
+}
 
 function partOne() {
+    let push_amount = 0;
+    let used_turn = false;
+
     console.log(`Initial state: ${data}`);
     for(let i = 1; i <= 80; i++) {
 	push_amount = 0;
@@ -98,10 +113,33 @@ function partOne() {
 	}
 	
 	console.log(`After ${i} days`);
-	console.log(data);
     }
 
     console.log(data.length);
 }
 
-partOne();
+function partTwo() {
+    let fish_array = [0, 0, 0, 0, 0, 0, 0, 0, 0];
+    let sum = 0;
+    
+    data.forEach((item) => {
+	fish_array[item]++;	    
+    });
+
+    console.log(`Initial state: ${data}`);
+    console.log(`Fish array: ${fish_array}`);
+    
+    for(let i = 1; i <= 256; i++) {
+	let reset_fish = fish_array[0];
+	
+	fish_array = shift(fish_array, 0, 1);
+
+	fish_array[6] += reset_fish;
+    }
+
+    fish_array.forEach((item) => {
+	sum += item;
+    });
+
+    console.log(`Fish count after 256 days: ${sum}`);		       
+}
